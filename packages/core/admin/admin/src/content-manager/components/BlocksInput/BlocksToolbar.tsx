@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Link } from '@strapi/icons';
+import { Link, Magic } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
@@ -468,6 +468,74 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+const AIButton = ({ disabled }: { disabled: boolean }) => {
+  const { editor } = useBlocksEditorContext('LinkButton');
+
+  const isAIActive = () => {
+    const { selection } = editor;
+
+    if (!selection) return false;
+
+    const [match] = Array.from(
+      Editor.nodes(editor, {
+        at: Editor.unhangRange(editor, selection),
+        match: (node) => SlateElement.isElement(node) && node.type === 'link',
+      })
+    );
+
+    return Boolean(match);
+  };
+
+  const isLinkDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    // Always enabled when there's no selection
+    if (!editor.selection) {
+      return false;
+    }
+
+    // Get the block node closest to the anchor and focus
+    const anchorNodeEntry = Editor.above(editor, {
+      at: editor.selection.anchor,
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
+    });
+    const focusNodeEntry = Editor.above(editor, {
+      at: editor.selection.focus,
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
+    });
+
+    if (!anchorNodeEntry || !focusNodeEntry) {
+      return false;
+    }
+
+    // Disabled if the anchor and focus are not in the same block
+    return anchorNodeEntry[0] !== focusNodeEntry[0];
+  };
+
+  const addLink = () => {
+    editor.shouldSaveLinkPath = true;
+    // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
+    insertLink(editor, { url: '' });
+  };
+
+  return (
+    <ToolbarButton
+      icon={Magic}
+      name="link"
+      label={{
+        id: 'components.Blocks.AI',
+        defaultMessage: 'AI',
+      }}
+      isActive={isAIActive()}
+      handleClick={addLink}
+      disabled={isLinkDisabled()}
+    />
+  );
+};
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
 
@@ -514,6 +582,7 @@ const BlocksToolbar = () => {
               />
             ))}
             <LinkButton disabled={isButtonDisabled} />
+            <AIButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
         <Separator />

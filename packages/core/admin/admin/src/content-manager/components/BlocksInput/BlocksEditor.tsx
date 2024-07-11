@@ -17,6 +17,7 @@ import { codeBlocks } from './Blocks/Code';
 import { headingBlocks } from './Blocks/Heading';
 import { imageBlocks } from './Blocks/Image';
 import { linkBlocks } from './Blocks/Link';
+import { aiBlocks } from './Blocks/AI';
 import { listBlocks } from './Blocks/List';
 import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
@@ -26,6 +27,7 @@ import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
+import { withAI } from './plugins/withAI';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 /* -------------------------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ interface SelectorBlock extends BaseBlock {
   label: MessageDescriptor;
 }
 
-type NonSelectorBlockKey = 'list-item' | 'link';
+type NonSelectorBlockKey = 'list-item' | 'link' | 'ai';
 
 const selectorBlockKeys = [
   'paragraph',
@@ -79,8 +81,8 @@ const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
 type BlocksStore = {
   [K in SelectorBlockKey]: SelectorBlock;
 } & {
-  [K in NonSelectorBlockKey]: NonSelectorBlock;
-};
+    [K in NonSelectorBlockKey]: NonSelectorBlock;
+  };
 
 interface BlocksEditorContextValue {
   blocks: BlocksStore;
@@ -158,8 +160,8 @@ function useResetKey(value?: Attribute.BlocksValue): {
 
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
-  (value: Editor) =>
-    fns.reduce<Editor>((prev, fn) => fn(prev), value);
+    (value: Editor) =>
+      fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
 interface BlocksEditorProps extends BlocksContentProps {
   name: string;
@@ -175,7 +177,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
-      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
+      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks, withAI)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
@@ -221,6 +223,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       ...headingBlocks,
       ...listBlocks,
       ...linkBlocks,
+      ...aiBlocks,
       ...imageBlocks,
       ...quoteBlocks,
       ...codeBlocks,
