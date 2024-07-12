@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Editor, Path, Range, Transforms } from 'slate';
+import { Editor, Path, Range, Transforms, select } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -42,8 +42,9 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     );
     const linkRef = React.useRef<HTMLAnchorElement>(null!);
     const elementText = link.children.map((child) => child.text).join('');
-    const [linkText, setLinkText] = React.useState(elementText);
+    const [selectedText, setSelectedText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
+    const [userPrompt, setUserPrompt] = React.useState('');
     const linkInputRef = React.useRef<HTMLInputElement>(null);
     const [showRemoveButton, setShowRemoveButton] = React.useState(false);
     const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
@@ -72,7 +73,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const handleSave: React.FormEventHandler = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      setAIgeneratedContent('new content');
+      requestAI(userPrompt);
 
       // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
       /* if (editor.selection && Range.isCollapsed(editor.selection)) {
@@ -80,7 +81,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         Transforms.select(editor, parentPath);
       }
 
-      editLink(editor, { url: linkUrl, text: linkText });
+      editLink(editor, { url: linkUrl, text: selectedText });
       setPopoverOpen(false);
       editor.lastInsertedLinkPath = null; */
     };
@@ -93,7 +94,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         Transforms.select(editor, parentPath);
       }
 
-      editLink(editor, { url: '', text: linkText });
+      editLink(editor, { url: '', text: aiGeneratedContent });
       setPopoverOpen(false);
       editor.lastInsertedLinkPath = null;
     }
@@ -108,9 +109,27 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       ReactEditor.focus(editor);
     };
 
-    const inputNotDirty = !linkText;
+    const inputNotDirty = !selectedText;
 
     const composedRefs = composeRefs(linkRef, forwardedRef);
+
+    const requestAI = async (prompt: string) => {
+      /* const { text } = await generateText({
+        model: openai('gpt-4-turbo'),
+        system: 'You are a friendly assistant!',
+        prompt: 'Why is the sky blue?',
+      }); */
+      console.log('requestAI', prompt)
+      setAIgeneratedContent(`This is the AI response from this prompt: ${prompt}`);
+    }
+
+    const makeShorter = (e: any) => {
+      requestAI(`Make this text shorter: ${selectedText}`);
+    }
+
+    const makeLonger = (e: any) => {
+      requestAI(`Make this text shorter: ${selectedText}`);
+    }
 
     React.useEffect(() => {
       // Focus on the link input element when the popover opens
@@ -140,11 +159,13 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                       id: 'components.Blocks.popover.text.placeholder',
                       defaultMessage: 'Enter link text',
                     })}
-                    value={linkText}
+                    value={userPrompt}
                     onChange={(e) => {
-                      setLinkText(e.target.value);
+                      setUserPrompt(e.target.value);
                     }}
                   />
+                  <Button onClick={makeShorter}>Make shorter</Button>
+                  <Button onClick={makeLonger}>Make longer</Button>
                 </Flex>
                 {/* <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
                   Generate
@@ -153,17 +174,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <Flex justifyContent="space-between" width="100%">
                 <Typography color="primary600">{aiGeneratedContent}</Typography>
               </Flex>
-              <Flex justifyContent="space-between" width="100%">
-                <RemoveButton
-                  variant="danger-light"
-                  onClick={() => removeLink(editor)}
-                  visible={showRemoveButton}
-                >
-                  {formatMessage({
-                    id: 'components.Blocks.popover.remove',
-                    defaultMessage: 'Remove',
-                  })}
-                </RemoveButton>
+              <Flex justifyContent="left" width="100%">
                 <Flex gap={2}>
                   <Button variant="tertiary" onClick={handleDismiss}>
                     {formatMessage({
@@ -171,9 +182,11 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                  <Button onClick={replaceText}>
-                    Replace
-                  </Button>
+                  {aiGeneratedContent.length > 1 &&
+                    <Button onClick={replaceText}>
+                      Replace
+                    </Button>
+                  }
                 </Flex>
               </Flex>
             </Flex>
