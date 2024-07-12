@@ -23,7 +23,7 @@ const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
 `;
 
-const RemoveButton = styled(Button)<{ visible: boolean }>`
+const RemoveButton = styled(Button) <{ visible: boolean }>`
   visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
 `;
 
@@ -46,6 +46,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const linkInputRef = React.useRef<HTMLInputElement>(null);
     const [showRemoveButton, setShowRemoveButton] = React.useState(false);
     const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
+    const [aiGeneratedContent, setAIgeneratedContent] = React.useState('');
 
     const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
       e.preventDefault();
@@ -69,17 +70,32 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
 
     const handleSave: React.FormEventHandler = (e) => {
       e.stopPropagation();
+      e.preventDefault();
+      setAIgeneratedContent('new content');
 
       // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
+      /* if (editor.selection && Range.isCollapsed(editor.selection)) {
         const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
         Transforms.select(editor, parentPath);
       }
 
       editLink(editor, { url: linkUrl, text: linkText });
       setPopoverOpen(false);
-      editor.lastInsertedLinkPath = null;
+      editor.lastInsertedLinkPath = null; */
     };
+
+    const replaceText = () => {
+      console.log('replaceText')
+      // If the selection is collapsed, we select the parent node because we want all the link to be replaced)
+      if (editor.selection && Range.isCollapsed(editor.selection)) {
+        const [, parentPath] = Editor.parent(editor, editor.selection.focus?.path);
+        Transforms.select(editor, parentPath);
+      }
+
+      editLink(editor, { url: '', text: linkText });
+      setPopoverOpen(false);
+      editor.lastInsertedLinkPath = null;
+    }
 
     const handleDismiss = () => {
       setPopoverOpen(false);
@@ -91,10 +107,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       ReactEditor.focus(editor);
     };
 
-    const inputNotDirty =
-      !linkText ||
-      !linkUrl ||
-      (link.url && link.url === linkUrl && elementText && elementText === linkText);
+    const inputNotDirty = !linkText;
 
     const composedRefs = composeRefs(linkRef, forwardedRef);
 
@@ -120,10 +133,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <Field width="368px">
                 <Flex direction="column" gap={1} alignItems="stretch">
                   <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.text',
-                      defaultMessage: 'Text',
-                    })}
+                    What could make Strapi for you?
                   </FieldLabel>
                   <FieldInput
                     name="text"
@@ -137,27 +147,14 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                     }}
                   />
                 </Flex>
+                {/* <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
+                  Generate
+                </Button> */}
               </Field>
-              <Field width="368px">
-                <Flex direction="column" gap={1} alignItems="stretch">
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.link',
-                      defaultMessage: 'Link',
-                    })}
-                  </FieldLabel>
-                  <FieldInput
-                    ref={linkInputRef}
-                    name="url"
-                    placeholder={formatMessage({
-                      id: 'components.Blocks.popover.link.placeholder',
-                      defaultMessage: 'Paste link',
-                    })}
-                    value={linkUrl}
-                    onChange={onLinkChange}
-                  />
-                </Flex>
-              </Field>
+              <Flex justifyContent="space-between" width="100%">
+                <p>{aiGeneratedContent}</p>
+              </Flex>
+
               <Flex justifyContent="space-between" width="100%">
                 <RemoveButton
                   variant="danger-light"
@@ -176,11 +173,8 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                  <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.save',
-                      defaultMessage: 'Save',
-                    })}
+                  <Button onClick={replaceText}>
+                    Replace
                   </Button>
                 </Flex>
               </Flex>

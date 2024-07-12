@@ -21,12 +21,18 @@ export interface LinkInlineNode extends BaseNode {
   children: TextInlineNode[];
 }
 
+export interface AIInlineNode extends BaseNode {
+  type: 'ai';
+  url: string;
+  children: TextInlineNode[];
+}
+
 interface ListItemInlineNode extends BaseNode {
   type: 'list-item';
   children: DefaultInlineNode[];
 }
 
-type InlineNode = TextInlineNode | LinkInlineNode | ListItemInlineNode;
+type InlineNode = TextInlineNode | LinkInlineNode | AIInlineNode | ListItemInlineNode;
 
 type DefaultInlineNode = Exclude<InlineNode, ListItemInlineNode>;
 type NonTextInlineNode = Exclude<InlineNode, TextInlineNode>;

@@ -16,6 +16,7 @@ import {
   useBlocksEditorContext,
 } from './BlocksEditor';
 import { insertLink } from './utils/links';
+import { insertAI } from './utils/ai';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled(Flex)`
@@ -469,7 +470,7 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
 };
 
 const AIButton = ({ disabled }: { disabled: boolean }) => {
-  const { editor } = useBlocksEditorContext('LinkButton');
+  const { editor } = useBlocksEditorContext('AIButton');
 
   const isAIActive = () => {
     const { selection } = editor;
@@ -515,10 +516,10 @@ const AIButton = ({ disabled }: { disabled: boolean }) => {
     return anchorNodeEntry[0] !== focusNodeEntry[0];
   };
 
-  const addLink = () => {
+  const addAI = () => {
     editor.shouldSaveLinkPath = true;
     // We insert an empty anchor, so we split the DOM to have a element we can use as reference for the popover
-    insertLink(editor, { url: '' });
+    insertAI(editor, { url: '' });
   };
 
   return (
@@ -530,7 +531,7 @@ const AIButton = ({ disabled }: { disabled: boolean }) => {
         defaultMessage: 'AI',
       }}
       isActive={isAIActive()}
-      handleClick={addLink}
+      handleClick={addAI}
       disabled={isLinkDisabled()}
     />
   );

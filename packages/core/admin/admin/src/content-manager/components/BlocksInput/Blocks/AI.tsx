@@ -138,6 +138,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                                     />
                                 </Flex>
                             </Field>
+                            AI AI AI
                             <Field width="368px">
                                 <Flex direction="column" gap={1} alignItems="stretch">
                                     <FieldLabel>
@@ -203,8 +204,8 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>((props, for
     return <LinkContent {...props} link={props.element} ref={forwardedRef} />;
 });
 
-const aiBlocks: Pick<BlocksStore, 'link'> = {
-    link: {
+const aiBlocks: Pick<BlocksStore, 'ai'> = {
+    ai: {
         renderElement: (props) => (
             <Link element={props.element} attributes={props.attributes}>
                 {props.children}
