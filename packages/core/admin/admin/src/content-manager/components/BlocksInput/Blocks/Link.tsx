@@ -114,13 +114,36 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const composedRefs = composeRefs(linkRef, forwardedRef);
 
     const requestAI = async (prompt: string) => {
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer `,
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 2000,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const data = await response.json();
+        const answer = data.choices[0].message.content.trim();
+        setAIgeneratedContent(answer);
+
+        // responseElement.textContent = data.choices[0].text.trim();
+      } catch (error) {
+        console.log(error);
+      }
       /* const { text } = await generateText({
         model: openai('gpt-4-turbo'),
         system: 'You are a friendly assistant!',
         prompt: 'Why is the sky blue?',
       }); */
-      console.log('requestAI', prompt)
-      setAIgeneratedContent(`This is the AI response from this prompt: ${prompt}`);
+
     }
 
     const makeShorter = (e: any) => {
