@@ -13,7 +13,7 @@ import {
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { composeRefs } from '../../../utils/refs';
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
@@ -31,16 +31,6 @@ const RemoveButton = styled(Button) <{ visible: boolean }>`
 interface LinkContentProps extends RenderElementProps {
   link: Block<'link'>;
 }
-
-const stylesToInherit = css`
-  font-size: inherit;
-  color: white;
-  line-height: inherit;
-`;
-
-const AIGeneratedText = styled(Typography)`
-  ${stylesToInherit}
-`;
 
 const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
   ({ link, children, attributes }, forwardedRef) => {
@@ -162,10 +152,9 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   Generate
                 </Button> */}
               </Field>
-              <Flex width="100%">
-                <AIGeneratedText>{aiGeneratedContent}</AIGeneratedText>
+              <Flex justifyContent="space-between" width="100%">
+                <Typography color="primary600">{aiGeneratedContent}</Typography>
               </Flex>
-
               <Flex justifyContent="space-between" width="100%">
                 <RemoveButton
                   variant="danger-light"
