@@ -194,7 +194,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   Generate
                 </Button> */}
               </Field>
-              <Flex justifyContent="space-between" width="100%">
+              <Flex justifyContent="space-between" width="368px">
                 <Typography color="primary600">{aiGeneratedContent}</Typography>
               </Flex>
               <Flex justifyContent="left" width="100%">
