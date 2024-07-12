@@ -119,15 +119,13 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
 
     return (
       <>
-        <StyledBaseLink
+        <Typography
           {...attributes}
           ref={composedRefs}
-          href={link.url}
-          onClick={handleOpenEditPopover}
           color="primary600"
         >
           {children}
-        </StyledBaseLink>
+        </Typography>
         {popoverOpen && (
           <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
             <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
