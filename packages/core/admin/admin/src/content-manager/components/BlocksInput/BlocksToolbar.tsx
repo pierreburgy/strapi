@@ -582,7 +582,7 @@ const BlocksToolbar = () => {
                 disabled={isButtonDisabled}
               />
             ))}
-            <LinkButton disabled={isButtonDisabled} />
+            {/* <LinkButton disabled={isButtonDisabled} /> */}
             <AIButton disabled={isButtonDisabled} />
           </Flex>
         </Toolbar.ToggleGroup>
